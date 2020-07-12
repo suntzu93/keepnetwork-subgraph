@@ -1,0 +1,47 @@
+type Approval @entity {
+  "Transaction hash concatenated with log index"
+  id: ID!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  value: BigInt!
+  owner: Bytes
+  spender: Bytes
+}
+
+type Transfer @entity {
+  "Transaction hash concatenated with log index"
+  id: ID!
+  "Block number"
+  blockNumber: BigInt!
+  "Block time"
+  timestamp: BigInt!
+  "cTokens transferred"
+  value: BigDecimal!
+  "Account that sent tokens"
+  from: Bytes
+  "Account that received tokens"
+  to: Bytes
+}
+
+type Governance @entity{
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+  totalSupply: BigInt!
+  totalTokenHolders: BigInt!
+  currentTokenHolders: BigInt!
+}
+
+type TokenHolder @entity{
+  id: ID!
+  "KEEP Token balance of this address expressed in the smallest unit of the KEEP Token"
+  tokenBalanceRaw: BigInt!
+  "KEEP Token balance of this address expressed as a BigDecimal normalized value for the KEEP Token"
+  tokenBalance: BigDecimal!
+  "Total amount of KEEP Token ever held by this address expressed in the smallest unit of the KEEP Token"
+  totalTokensHeldRaw: BigInt!
+  "Total amount of KEEP Token ever held by this address expressed as a BigDecimal normalized value for the KEEP Token"
+  totalTokensHeld: BigDecimal!
+
+}
