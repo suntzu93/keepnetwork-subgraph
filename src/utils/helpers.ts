@@ -2,7 +2,10 @@ import {
   Approval,
   Transfer,
   TokenHolder,
-  Governance
+  Governance,
+  TokenStaking,
+  TransactionStaking,
+  Member
 } from "../../generated/schema";
 
 import { DEFAULT_DECIMALS } from "./decimals";
@@ -14,7 +17,7 @@ import {
   BIGDECIMAL_ZERO,
   BIGINT_SUPPLY
 } from "./contants";
-import { Bytes } from "@graphprotocol/graph-ts";
+import { Bytes, Address } from "@graphprotocol/graph-ts";
 
 export function getOrCreateApproval
   (id: string): Approval {
@@ -84,4 +87,45 @@ export function getGovernanceEntity(): Governance {
   }
 
   return governance as Governance;
+}
+
+export function getTokenStaking(): TokenStaking{
+  let tokenStaking = TokenStaking.load("TokenStaking");
+  if(tokenStaking == null){
+    tokenStaking = new TokenStaking("TokenStaking");
+    tokenStaking.contractAddress = Address.fromString("0x6D1140a8c8e6Fac242652F0a5A8171b898c67600");
+    tokenStaking.initializationPeriod = BIGINT_ZERO;
+    tokenStaking.maximumLockDuration = BIGINT_ZERO;
+    tokenStaking.minimumStake = BIGINT_ZERO;
+    tokenStaking.minimumStakeSchedule = BIGINT_ZERO;
+    tokenStaking.minimumStakeScheduleStart = BIGINT_ZERO;
+    tokenStaking.minimumStakeSteps = BIGINT_ZERO;
+    tokenStaking.totalStaker = BIGINT_ZERO;
+    tokenStaking.totalTokenSlash = BIGINT_ZERO;
+    tokenStaking.totalTokenStaking = BIGINT_ZERO;
+  }
+  return tokenStaking as TokenStaking;
+}
+
+export function getOrCreateMember(id: string): Member {
+  let member = Member.load(id);
+  if(member == null){
+    member = new Member(id);
+    member.amount = BIGINT_ZERO;
+    member.stakingState = "STAKED";
+    member.until = BIGINT_ZERO;
+    member.tokenStaking = getTokenStaking().id;
+    member.undelegatedAt = BIGINT_ZERO;
+  }
+  return member as Member;
+}
+
+export function getOrCreateTransactionStaking(id: string): TransactionStaking {
+  let transactionStaking = TransactionStaking.load(id);
+  if(transactionStaking == null){
+    transactionStaking = new TransactionStaking(id);
+    transactionStaking.timestamp = BIGINT_ZERO;
+    transactionStaking.blockNumber = BIGINT_ZERO;
+  }
+  return transactionStaking as TransactionStaking;
 }

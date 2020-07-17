@@ -1,3 +1,13 @@
+enum StakingState{
+  STAKED,
+  STAKED_LOCK,
+  UNDELEGATED,
+  LOCK_RELEASED,
+  EXPIRED_LOCK_RELEASED,
+  SLASHED,
+  SEIZED
+}
+
 type Approval @entity {
   "Transaction hash concatenated with log index"
   id: ID!
@@ -43,5 +53,39 @@ type TokenHolder @entity{
   totalTokensHeldRaw: BigInt!
   "Total amount of KEEP Token ever held by this address expressed as a BigDecimal normalized value for the KEEP Token"
   totalTokensHeld: BigDecimal!
+}
 
+type TokenStaking @entity{
+  id : ID!
+  contractAddress: Bytes!
+  initializationPeriod : BigInt
+  maximumLockDuration: BigInt
+  minimumStake : BigInt
+  minimumStakeBase:  BigInt
+  minimumStakeSchedule:  BigInt
+  minimumStakeScheduleStart: BigInt
+  minimumStakeSteps:  BigInt
+  totalStaker: BigInt
+  totalTokenStaking: BigInt
+  totalTokenSlash : BigInt
+  members : [Member!] @derivedFrom(field: "tokenStaking")
+}
+
+type Member @entity{
+  id: ID!
+  tokenStaking : TokenStaking!
+  lockCreater : Bytes
+  amount : BigInt!
+  stakingState : StakingState
+  until : BigInt
+  undelegatedAt :  BigInt
+  recoveredAt : BigInt
+  transaction : [TransactionStaking!] @derivedFrom(field: "member")
+}
+
+type TransactionStaking @entity {
+  id: ID!
+  timestamp: BigInt
+  blockNumber: BigInt
+  member: Member!
 }

@@ -27,3 +27,44 @@ dataSources:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
       file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: RandomBeaconContract
+    network: mainnet
+    source:
+      address: "0x6D1140a8c8e6Fac242652F0a5A8171b898c67600"
+      abi: RandomBeaconContract
+      startBlock : 9958429
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - ExpiredLockReleased
+        - LockReleased
+        - RecoveredStake
+        - StakeLocked
+        - Staked
+        - TokensSeized
+        - TokensSlashed
+        - Undelegated
+      abis:
+        - name: RandomBeaconContract
+          file: ./abis/RandomBeaconContract.json
+      eventHandlers:
+        - event: ExpiredLockReleased(indexed address,address)
+          handler: handleExpiredLockReleased
+        - event: LockReleased(indexed address,address)
+          handler: handleLockReleased
+        - event: RecoveredStake(address,uint256)
+          handler: handleRecoveredStake
+        - event: StakeLocked(indexed address,address,uint256)
+          handler: handleStakeLocked
+        - event: Staked(indexed address,uint256)
+          handler: handleStaked
+        - event: TokensSeized(indexed address,uint256)
+          handler: handleTokensSeized
+        - event: TokensSlashed(indexed address,uint256)
+          handler: handleTokensSlashed
+        - event: Undelegated(indexed address,uint256)
+          handler: handleUndelegated
+      file: ./src/RandomBeacon.ts
