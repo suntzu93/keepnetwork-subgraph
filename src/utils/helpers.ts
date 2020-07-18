@@ -40,8 +40,9 @@ export function getOrCreateTransfer
     transfer.timestamp = BIGINT_ZERO;
     transfer.blockNumber = BIGINT_ZERO;
     transfer.value = BIGDECIMAL_ZERO;
+    transfer.gasUsed = BIGINT_ZERO;
+    transfer.gasPrice = BIGDECIMAL_ZERO;
   }
-  transfer.save();
   return transfer as Transfer; 
 }
 

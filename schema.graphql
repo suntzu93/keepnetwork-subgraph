@@ -31,6 +31,8 @@ type Transfer @entity {
   from: Bytes
   "Account that received tokens"
   to: Bytes
+  gasUsed: BigInt!
+  gasPrice: BigDecimal!
 }
 
 type Governance @entity{

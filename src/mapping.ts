@@ -49,6 +49,8 @@ export function handleTransfer(event: Transfer): void {
   transfer.from = event.params.from;
   transfer.to = event.params.to;
   transfer.value = toDecimal(event.params.value);
+  transfer.gasUsed = event.transaction.gasUsed;
+  transfer.gasPrice = toDecimal(event.transaction.gasPrice);
   transfer.save()
 
   // fromHolder

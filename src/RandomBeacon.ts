@@ -19,7 +19,6 @@ import {
 import { BIGINT_ONE } from "./utils/contants";
 
 export function handleStaked(event: Staked): void {
-  log.error("handleStaked from = {}" , [event.params.from.toHex()])
   let tokenStaking = getTokenStaking();
   let member = getOrCreateMember(event.params.from.toHex());
   member.amount = event.params.value;
