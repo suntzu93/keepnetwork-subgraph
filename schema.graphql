@@ -39,8 +39,9 @@ type Governance @entity{
   id: ID!
   name: String!
   symbol: String!
+  contractAddress: String!
   decimals: Int!
-  totalSupply: BigInt!
+  maxSupply: BigInt!
   totalTokenHolders: BigInt!
   currentTokenHolders: BigInt!
 }

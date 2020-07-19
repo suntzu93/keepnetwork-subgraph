@@ -15,7 +15,8 @@ import {
   BIGINT_ZERO,
   BIGINT_ONE,
   BIGDECIMAL_ZERO,
-  BIGINT_SUPPLY
+  BIGINT_SUPPLY,
+  KEEP_CONTRACT
 } from "./contants";
 import { Bytes, Address } from "@graphprotocol/graph-ts";
 
@@ -84,7 +85,8 @@ export function getGovernanceEntity(): Governance {
     governance.decimals = DEFAULT_DECIMALS;
     governance.name = "KEEP Network";
     governance.symbol = "KEEP";
-    governance.totalSupply = BIGINT_SUPPLY;
+    governance.maxSupply = BIGINT_SUPPLY;
+    governance.contractAddress = KEEP_CONTRACT;
   }
 
   return governance as Governance;
