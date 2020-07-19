@@ -102,8 +102,8 @@ export function getTokenStaking(): TokenStaking{
     tokenStaking.minimumStakeScheduleStart = BIGINT_ZERO;
     tokenStaking.minimumStakeSteps = BIGINT_ZERO;
     tokenStaking.totalStaker = BIGINT_ZERO;
-    tokenStaking.totalTokenSlash = BIGINT_ZERO;
-    tokenStaking.totalTokenStaking = BIGINT_ZERO;
+    tokenStaking.totalTokenSlash = BIGDECIMAL_ZERO;
+    tokenStaking.totalTokenStaking = BIGDECIMAL_ZERO;
   }
   return tokenStaking as TokenStaking;
 }

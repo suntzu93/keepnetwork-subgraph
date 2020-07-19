@@ -68,8 +68,8 @@ type TokenStaking @entity{
   minimumStakeScheduleStart: BigInt
   minimumStakeSteps:  BigInt
   totalStaker: BigInt
-  totalTokenStaking: BigInt
-  totalTokenSlash : BigInt
+  totalTokenStaking: BigDecimal
+  totalTokenSlash : BigDecimal
   members : [Member!] @derivedFrom(field: "tokenStaking")
 }
 

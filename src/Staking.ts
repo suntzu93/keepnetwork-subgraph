@@ -1,6 +1,6 @@
 import { BigInt,log } from "@graphprotocol/graph-ts"
 import {
-  RandomBeaconContract,
+  StakingContract,
   ExpiredLockReleased,
   LockReleased,
   RecoveredStake,
@@ -9,7 +9,7 @@ import {
   TokensSeized,
   TokensSlashed,
   Undelegated
-} from "../generated/RandomBeaconContract/RandomBeaconContract"
+} from "../generated/StakingContract/StakingContract"
 import {
   getTokenStaking,
   getOrCreateMember,
@@ -17,6 +17,7 @@ import {
 } from "./utils/helpers";
 
 import { BIGINT_ONE } from "./utils/contants";
+import { toDecimal } from "./utils/decimals";
 
 export function handleStaked(event: Staked): void {
   let tokenStaking = getTokenStaking();
@@ -25,7 +26,7 @@ export function handleStaked(event: Staked): void {
   member.tokenStaking = tokenStaking.id;
   member.stakingState = "STAKED";
 
-  let contract = RandomBeaconContract.bind(event.address);
+  let contract = StakingContract.bind(event.address);
   tokenStaking.initializationPeriod = contract.initializationPeriod();
   tokenStaking.maximumLockDuration = contract.maximumLockDuration();
   tokenStaking.minimumStake = contract.minimumStake();
@@ -33,7 +34,7 @@ export function handleStaked(event: Staked): void {
   tokenStaking.minimumStakeScheduleStart = contract.minimumStakeScheduleStart();
   tokenStaking.minimumStakeSteps = contract.minimumStakeSteps();
   tokenStaking.totalStaker = tokenStaking.totalStaker.plus(BIGINT_ONE);
-  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.plus(event.params.value);
+  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.plus(toDecimal(event.params.value));
 
   let transactionStaking = getOrCreateTransactionStaking(event.transaction.hash.toHex());
   transactionStaking.timestamp = event.block.timestamp;
@@ -99,8 +100,8 @@ export function handleExpiredLockReleased(event: ExpiredLockReleased): void {
 
 export function handleTokensSlashed(event: TokensSlashed): void {
   let tokenStaking = getTokenStaking();
-  tokenStaking.totalTokenSlash = tokenStaking.totalTokenSlash.plus(event.params.amount);
-  let contract = RandomBeaconContract.bind(event.address);
+  tokenStaking.totalTokenSlash = tokenStaking.totalTokenSlash.plus(toDecimal(event.params.amount));
+  let contract = StakingContract.bind(event.address);
   tokenStaking.initializationPeriod = contract.initializationPeriod();
   tokenStaking.maximumLockDuration = contract.maximumLockDuration();
   tokenStaking.minimumStake = contract.minimumStake();
@@ -123,8 +124,8 @@ export function handleTokensSlashed(event: TokensSlashed): void {
 
 export function handleTokensSeized(event: TokensSeized): void {
   let tokenStaking = getTokenStaking();
-  tokenStaking.totalTokenSlash = tokenStaking.totalTokenSlash.plus(event.params.amount);
-  let contract = RandomBeaconContract.bind(event.address);
+  tokenStaking.totalTokenSlash = tokenStaking.totalTokenSlash.plus(toDecimal(event.params.amount));
+  let contract = StakingContract.bind(event.address);
   tokenStaking.initializationPeriod = contract.initializationPeriod();
   tokenStaking.maximumLockDuration = contract.maximumLockDuration();
   tokenStaking.minimumStake = contract.minimumStake();
@@ -153,7 +154,7 @@ export function handleUndelegated(event: Undelegated): void {
   member.save()
 
   let tokenStaking = getTokenStaking();
-  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.minus(member.amount);
+  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.minus(toDecimal(member.amount));
   tokenStaking.totalStaker = tokenStaking.totalStaker.minus(BIGINT_ONE);
   tokenStaking.save()
 
