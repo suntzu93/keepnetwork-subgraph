@@ -1,5 +1,6 @@
 enum StakingState{
   STAKED,
+  RECOVERED_STAKED,
   STAKED_LOCK,
   UNDELEGATED,
   LOCK_RELEASED,
@@ -96,4 +97,5 @@ type TransactionStaking @entity {
   gasPrice: BigInt!
   gasUsed: BigInt!
   member: Member!
+  transactionType: StakingState!
 }
