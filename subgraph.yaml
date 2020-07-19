@@ -50,6 +50,8 @@ dataSources:
       abis:
         - name: StakingContract
           file: ./abis/StakingContract.json
+        - name: Contract
+          file: ./abis/Contract.json
       eventHandlers:
         - event: ExpiredLockReleased(indexed address,address)
           handler: handleExpiredLockReleased

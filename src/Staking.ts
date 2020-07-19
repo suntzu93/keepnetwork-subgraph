@@ -1,4 +1,4 @@
-import { BigInt,log } from "@graphprotocol/graph-ts"
+import { BigInt,log, Address } from "@graphprotocol/graph-ts"
 import {
   StakingContract,
   ExpiredLockReleased,
@@ -16,7 +16,10 @@ import {
   getOrCreateTransactionStaking
 } from "./utils/helpers";
 
-import { BIGINT_ONE } from "./utils/contants";
+import { 
+  Contract as MainContract } from "../generated/Contract/Contract"
+
+import { BIGINT_ONE, KEEP_CONTRACT } from "./utils/contants";
 import { toDecimal } from "./utils/decimals";
 
 export function handleStaked(event: Staked): void {
@@ -27,6 +30,7 @@ export function handleStaked(event: Staked): void {
   member.stakingState = "STAKED";
 
   let contract = StakingContract.bind(event.address);
+  let mainContract = MainContract.bind(Address.fromString(KEEP_CONTRACT));
   tokenStaking.initializationPeriod = contract.initializationPeriod();
   tokenStaking.maximumLockDuration = contract.maximumLockDuration();
   tokenStaking.minimumStake = contract.minimumStake();
@@ -34,7 +38,7 @@ export function handleStaked(event: Staked): void {
   tokenStaking.minimumStakeScheduleStart = contract.minimumStakeScheduleStart();
   tokenStaking.minimumStakeSteps = contract.minimumStakeSteps();
   tokenStaking.totalStaker = tokenStaking.totalStaker.plus(BIGINT_ONE);
-  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.plus(toDecimal(event.params.value));
+  tokenStaking.totalTokenStaking = toDecimal(mainContract.balanceOf(event.address));
 
   let transactionStaking = getOrCreateTransactionStaking(event.transaction.hash.toHex());
   transactionStaking.timestamp = event.block.timestamp;
@@ -53,6 +57,7 @@ export function handleStaked(event: Staked): void {
 }
 
 export function handleStakeLocked(event: StakeLocked): void {
+  log.error("handleStakeLocked",[]);
   let member = getOrCreateMember(event.params.operator.toHex());
   member.stakingState = "STAKED_LOCK";
   member.until = event.params.until;
@@ -94,6 +99,12 @@ export function handleRecoveredStake(event: RecoveredStake): void{
   member.recoveredAt = event.params.recoveredAt;
   member.save()
 
+  let mainContract = MainContract.bind(Address.fromString(KEEP_CONTRACT));
+  let tokenStaking = getTokenStaking();
+  tokenStaking.totalStaker = tokenStaking.totalStaker.minus(BIGINT_ONE);
+  tokenStaking.totalTokenStaking = toDecimal(mainContract.balanceOf(event.address));
+  tokenStaking.save()
+
   let transactionStaking = getOrCreateTransactionStaking(event.transaction.hash.toHex());
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
@@ -108,6 +119,7 @@ export function handleRecoveredStake(event: RecoveredStake): void{
 
 
 export function handleExpiredLockReleased(event: ExpiredLockReleased): void {
+  log.error("handleExpiredLockReleased address = {}",[event.params.operator.toHex()]);
   let member = getOrCreateMember(event.params.operator.toHex());
   member.stakingState = "EXPIRED_LOCK_RELEASED";
   member.save()
@@ -125,6 +137,7 @@ export function handleExpiredLockReleased(event: ExpiredLockReleased): void {
 }
 
 export function handleTokensSlashed(event: TokensSlashed): void {
+  log.error("handleTokensSlashed address = {}",[event.params.operator.toHex()]);
   let tokenStaking = getTokenStaking();
   tokenStaking.totalTokenSlash = tokenStaking.totalTokenSlash.plus(toDecimal(event.params.amount));
   let contract = StakingContract.bind(event.address);
@@ -189,9 +202,10 @@ export function handleUndelegated(event: Undelegated): void {
   member.undelegatedAt = event.params.undelegatedAt;
   member.save()
 
+  let mainContract = MainContract.bind(Address.fromString(KEEP_CONTRACT));
   let tokenStaking = getTokenStaking();
-  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.minus(member.amount);
   tokenStaking.totalStaker = tokenStaking.totalStaker.minus(BIGINT_ONE);
+  tokenStaking.totalTokenStaking = toDecimal(mainContract.balanceOf(event.address));
   tokenStaking.save()
 
   let transactionStaking = getOrCreateTransactionStaking(event.transaction.hash.toHex());
