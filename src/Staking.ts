@@ -40,6 +40,11 @@ export function handleStaked(event: Staked): void {
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
+  transactionStaking.value = toDecimal(event.params.value);
 
   tokenStaking.save()
   member.save()
@@ -57,6 +62,10 @@ export function handleStakeLocked(event: StakeLocked): void {
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
   transactionStaking.save()
 }
 
@@ -69,6 +78,10 @@ export function handleLockReleased(event: LockReleased): void {
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
   transactionStaking.save()
 }
 
@@ -82,6 +95,10 @@ export function handleRecoveredStake(event: RecoveredStake): void{
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
   transactionStaking.save()
 }
 
@@ -95,6 +112,10 @@ export function handleExpiredLockReleased(event: ExpiredLockReleased): void {
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
   transactionStaking.save()
 }
 
@@ -119,6 +140,10 @@ export function handleTokensSlashed(event: TokensSlashed): void {
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
   transactionStaking.save()
 }
 
@@ -143,6 +168,10 @@ export function handleTokensSeized(event: TokensSeized): void {
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
   transactionStaking.save()
 }
 
@@ -162,5 +191,10 @@ export function handleUndelegated(event: Undelegated): void {
   transactionStaking.timestamp = event.block.timestamp;
   transactionStaking.blockNumber = event.block.number;
   transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
+  transactionStaking.value = toDecimal(member.amount);
   transactionStaking.save()
 }

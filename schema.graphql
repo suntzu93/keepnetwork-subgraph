@@ -90,5 +90,10 @@ type TransactionStaking @entity {
   id: ID!
   timestamp: BigInt
   blockNumber: BigInt
+  from : String!
+  to: String!
+  value: BigDecimal
+  gasPrice: BigInt!
+  gasUsed: BigInt!
   member: Member!
 }
