@@ -22,7 +22,7 @@ import { toDecimal } from "./utils/decimals";
 export function handleStaked(event: Staked): void {
   let tokenStaking = getTokenStaking();
   let member = getOrCreateMember(event.params.from.toHex());
-  member.amount = event.params.value;
+  member.amount = toDecimal(event.params.value);
   member.tokenStaking = tokenStaking.id;
   member.stakingState = "STAKED";
 
@@ -138,7 +138,7 @@ export function handleTokensSlashed(event: TokensSlashed): void {
 
   let member = getOrCreateMember(event.params.operator.toHex());
   member.stakingState = "SLASHED";
-  member.amount = event.params.amount;
+  member.amount = toDecimal(event.params.amount);
   member.save()
 
   let transactionStaking = getOrCreateTransactionStaking(event.transaction.hash.toHex());
@@ -167,7 +167,7 @@ export function handleTokensSeized(event: TokensSeized): void {
 
   let member = getOrCreateMember(event.params.operator.toHex());
   member.stakingState = "SEIZED";
-  member.amount = event.params.amount;
+  member.amount = toDecimal(event.params.amount);
   member.save()
 
   let transactionStaking = getOrCreateTransactionStaking(event.transaction.hash.toHex());
@@ -190,7 +190,7 @@ export function handleUndelegated(event: Undelegated): void {
   member.save()
 
   let tokenStaking = getTokenStaking();
-  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.minus(toDecimal(member.amount));
+  tokenStaking.totalTokenStaking = tokenStaking.totalTokenStaking.minus(member.amount);
   tokenStaking.totalStaker = tokenStaking.totalStaker.minus(BIGINT_ONE);
   tokenStaking.save()
 
@@ -202,7 +202,7 @@ export function handleUndelegated(event: Undelegated): void {
   transactionStaking.to = event.transaction.to.toHex();
   transactionStaking.gasUsed = event.transaction.gasUsed;
   transactionStaking.gasPrice = event.transaction.gasPrice;
-  transactionStaking.value = toDecimal(member.amount);
+  transactionStaking.value = member.amount
   transactionStaking.transactionType = member.stakingState;
   transactionStaking.save()
 }

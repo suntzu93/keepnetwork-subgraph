@@ -79,7 +79,7 @@ type Member @entity{
   id: ID!
   tokenStaking : TokenStaking!
   lockCreater : Bytes
-  amount : BigInt!
+  amount : BigDecimal!
   stakingState : StakingState
   until : BigInt
   undelegatedAt :  BigInt

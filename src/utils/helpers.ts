@@ -114,7 +114,7 @@ export function getOrCreateMember(id: string): Member {
   let member = Member.load(id);
   if(member == null){
     member = new Member(id);
-    member.amount = BIGINT_ZERO;
+    member.amount = BIGDECIMAL_ZERO;
     member.stakingState = "STAKED";
     member.until = BIGINT_ZERO;
     member.tokenStaking = getTokenStaking().id;
