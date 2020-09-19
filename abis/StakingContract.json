@@ -1,16 +1,29 @@
 [
   {
     "inputs": [
-      { "internalType": "address", "name": "_tokenAddress", "type": "address" },
-      { "internalType": "address", "name": "_registry", "type": "address" },
       {
-        "internalType": "uint256",
-        "name": "_initializationPeriod",
-        "type": "uint256"
+        "internalType": "contract ERC20Burnable",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "contract TokenGrant",
+        "name": "_tokenGrant",
+        "type": "address"
+      },
+      {
+        "internalType": "contract TokenStakingEscrow",
+        "name": "_escrow",
+        "type": "address"
+      },
+      {
+        "internalType": "contract KeepRegistry",
+        "name": "_registry",
+        "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "_undelegationPeriod",
+        "name": "_initializationPeriod",
         "type": "uint256"
       }
     ],
@@ -60,19 +73,63 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "operator",
         "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "beneficiary",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "authorizer",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
-        "name": "recoveredAt",
+        "name": "value",
         "type": "uint256"
       }
     ],
+    "name": "OperatorStaked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      }
+    ],
     "name": "RecoveredStake",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      }
+    ],
+    "name": "StakeDelegated",
     "type": "event"
   },
   {
@@ -106,17 +163,17 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "from",
+        "name": "operator",
         "type": "address"
       },
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
       }
     ],
-    "name": "Staked",
+    "name": "StakeOwnershipTransferred",
     "type": "event"
   },
   {
@@ -155,6 +212,44 @@
       }
     ],
     "name": "TokensSlashed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "TopUpCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "topUp",
+        "type": "uint256"
+      }
+    ],
+    "name": "TopUpInitiated",
     "type": "event"
   },
   {
@@ -274,6 +369,26 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "_operator", "type": "address" }
+    ],
+    "name": "commitTopUp",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "deployedAt",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [
       { "internalType": "address", "name": "_operator", "type": "address" },
@@ -367,6 +482,21 @@
   {
     "constant": true,
     "inputs": [
+      {
+        "internalType": "address",
+        "name": "_operatorContract",
+        "type": "address"
+      }
+    ],
+    "name": "isApprovedOperatorContract",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
       { "internalType": "address", "name": "_operator", "type": "address" },
       {
         "internalType": "address",
@@ -406,84 +536,8 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "maximumLockDuration",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
     "name": "minimumStake",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "minimumStakeBase",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "minimumStakeSchedule",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "minimumStakeScheduleStart",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "minimumStakeSteps",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "name": "operators",
-    "outputs": [
-      { "internalType": "uint256", "name": "packedParams", "type": "uint256" },
-      { "internalType": "address", "name": "owner", "type": "address" },
-      {
-        "internalType": "address payable",
-        "name": "beneficiary",
-        "type": "address"
-      },
-      { "internalType": "address", "name": "authorizer", "type": "address" }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      { "internalType": "address", "name": "_address", "type": "address" }
-    ],
-    "name": "operatorsOf",
-    "outputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" }
-    ],
     "payable": false,
     "stateMutability": "view",
     "type": "function"
@@ -494,18 +548,6 @@
       { "internalType": "address", "name": "_operator", "type": "address" }
     ],
     "name": "ownerOf",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "ownerOperators",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "payable": false,
     "stateMutability": "view",
@@ -534,17 +576,6 @@
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "registry",
-    "outputs": [
-      { "internalType": "contract KeepRegistry", "name": "", "type": "address" }
-    ],
-    "payable": false,
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -602,18 +633,15 @@
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "token",
-    "outputs": [
-      {
-        "internalType": "contract ERC20Burnable",
-        "name": "",
-        "type": "address"
-      }
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "operator", "type": "address" },
+      { "internalType": "address", "name": "newOwner", "type": "address" }
     ],
+    "name": "transferStakeOwnership",
+    "outputs": [],
     "payable": false,
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

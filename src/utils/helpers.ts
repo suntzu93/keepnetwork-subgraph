@@ -98,11 +98,8 @@ export function getTokenStaking(): TokenStaking{
     tokenStaking = new TokenStaking("TokenStaking");
     tokenStaking.contractAddress = Address.fromString("0x6D1140a8c8e6Fac242652F0a5A8171b898c67600");
     tokenStaking.initializationPeriod = BIGINT_ZERO;
-    tokenStaking.maximumLockDuration = BIGINT_ZERO;
+    tokenStaking.undelegationPeriod = BIGINT_ZERO;
     tokenStaking.minimumStake = BIGINT_ZERO;
-    tokenStaking.minimumStakeSchedule = BIGINT_ZERO;
-    tokenStaking.minimumStakeScheduleStart = BIGINT_ZERO;
-    tokenStaking.minimumStakeSteps = BIGINT_ZERO;
     tokenStaking.totalStaker = BIGINT_ZERO;
     tokenStaking.totalTokenSlash = BIGDECIMAL_ZERO;
     tokenStaking.totalTokenStaking = BIGDECIMAL_ZERO;

@@ -3,11 +3,15 @@ import {
   StakingContract,
   ExpiredLockReleased,
   LockReleased,
+  OperatorStaked,
   RecoveredStake,
+  StakeDelegated,
   StakeLocked,
-  Staked,
+  StakeOwnershipTransferred,
   TokensSeized,
   TokensSlashed,
+  TopUpCompleted,
+  TopUpInitiated,
   Undelegated
 } from "../generated/StakingContract/StakingContract"
 import {
@@ -22,9 +26,9 @@ import {
 import { BIGINT_ONE, KEEP_CONTRACT } from "./utils/contants";
 import { toDecimal } from "./utils/decimals";
 
-export function handleStaked(event: Staked): void {
+export function handleOperatorStaked(event: OperatorStaked): void {
   let tokenStaking = getTokenStaking();
-  let member = getOrCreateMember(event.params.from.toHex());
+  let member = getOrCreateMember(event.params.operator.toHex());
   member.amount = toDecimal(event.params.value);
   member.tokenStaking = tokenStaking.id;
   member.stakingState = "STAKED";
@@ -32,11 +36,8 @@ export function handleStaked(event: Staked): void {
   let contract = StakingContract.bind(event.address);
   let mainContract = MainContract.bind(Address.fromString(KEEP_CONTRACT));
   tokenStaking.initializationPeriod = contract.initializationPeriod();
-  tokenStaking.maximumLockDuration = contract.maximumLockDuration();
   tokenStaking.minimumStake = contract.minimumStake();
-  tokenStaking.minimumStakeSchedule = contract.minimumStakeSchedule();
-  tokenStaking.minimumStakeScheduleStart = contract.minimumStakeScheduleStart();
-  tokenStaking.minimumStakeSteps = contract.minimumStakeSteps();
+  tokenStaking.undelegationPeriod = contract.undelegationPeriod();
   tokenStaking.totalStaker = tokenStaking.totalStaker.plus(BIGINT_ONE);
   tokenStaking.totalTokenStaking = toDecimal(mainContract.balanceOf(event.address));
 
@@ -57,7 +58,6 @@ export function handleStaked(event: Staked): void {
 }
 
 export function handleStakeLocked(event: StakeLocked): void {
-  log.error("handleStakeLocked",[]);
   let member = getOrCreateMember(event.params.operator.toHex());
   member.stakingState = "STAKED_LOCK";
   member.until = event.params.until;
@@ -96,7 +96,7 @@ export function handleLockReleased(event: LockReleased): void {
 export function handleRecoveredStake(event: RecoveredStake): void{
   let member = getOrCreateMember(event.params.operator.toHex());
   member.stakingState = "STAKED";
-  member.recoveredAt = event.params.recoveredAt;
+  member.recoveredAt = event.block.timestamp;
   member.save()
 
   let mainContract = MainContract.bind(Address.fromString(KEEP_CONTRACT));
@@ -119,7 +119,6 @@ export function handleRecoveredStake(event: RecoveredStake): void{
 
 
 export function handleExpiredLockReleased(event: ExpiredLockReleased): void {
-  log.error("handleExpiredLockReleased address = {}",[event.params.operator.toHex()]);
   let member = getOrCreateMember(event.params.operator.toHex());
   member.stakingState = "EXPIRED_LOCK_RELEASED";
   member.save()
@@ -137,16 +136,12 @@ export function handleExpiredLockReleased(event: ExpiredLockReleased): void {
 }
 
 export function handleTokensSlashed(event: TokensSlashed): void {
-  log.error("handleTokensSlashed address = {}",[event.params.operator.toHex()]);
   let tokenStaking = getTokenStaking();
   tokenStaking.totalTokenSlash = tokenStaking.totalTokenSlash.plus(toDecimal(event.params.amount));
   let contract = StakingContract.bind(event.address);
   tokenStaking.initializationPeriod = contract.initializationPeriod();
-  tokenStaking.maximumLockDuration = contract.maximumLockDuration();
   tokenStaking.minimumStake = contract.minimumStake();
-  tokenStaking.minimumStakeSchedule = contract.minimumStakeSchedule();
-  tokenStaking.minimumStakeScheduleStart = contract.minimumStakeScheduleStart();
-  tokenStaking.minimumStakeSteps = contract.minimumStakeSteps();
+  tokenStaking.undelegationPeriod = contract.undelegationPeriod();
   tokenStaking.save()
 
   let member = getOrCreateMember(event.params.operator.toHex());
@@ -171,11 +166,8 @@ export function handleTokensSeized(event: TokensSeized): void {
   tokenStaking.totalTokenSlash = tokenStaking.totalTokenSlash.plus(toDecimal(event.params.amount));
   let contract = StakingContract.bind(event.address);
   tokenStaking.initializationPeriod = contract.initializationPeriod();
-  tokenStaking.maximumLockDuration = contract.maximumLockDuration();
   tokenStaking.minimumStake = contract.minimumStake();
-  tokenStaking.minimumStakeSchedule = contract.minimumStakeSchedule();
-  tokenStaking.minimumStakeScheduleStart = contract.minimumStakeScheduleStart();
-  tokenStaking.minimumStakeSteps = contract.minimumStakeSteps();
+  tokenStaking.undelegationPeriod = contract.undelegationPeriod();
   tokenStaking.save()
 
   let member = getOrCreateMember(event.params.operator.toHex());
@@ -219,4 +211,38 @@ export function handleUndelegated(event: Undelegated): void {
   transactionStaking.value = member.amount
   transactionStaking.transactionType = member.stakingState;
   transactionStaking.save()
+}
+
+
+export function handleStakeDelegated(event: StakeDelegated): void {
+  let tokenStaking = getTokenStaking();
+  let member = getOrCreateMember(event.params.operator.toHex());
+  member.tokenStaking = tokenStaking.id;
+  member.stakingState = "DELEGATED";
+  member.save()
+
+  let transactionStaking = getOrCreateTransactionStaking(event.transaction.hash.toHex());
+  transactionStaking.timestamp = event.block.timestamp;
+  transactionStaking.blockNumber = event.block.number;
+  transactionStaking.member = member.id;
+  transactionStaking.from = event.transaction.from.toHex();
+  transactionStaking.to = event.transaction.to.toHex();
+  transactionStaking.gasUsed = event.transaction.gasUsed;
+  transactionStaking.gasPrice = event.transaction.gasPrice;
+  transactionStaking.transactionType = member.stakingState;
+  transactionStaking.save()
+}
+
+export function handleStakeOwnershipTransferred(
+  event: StakeOwnershipTransferred
+): void {}
+
+export function handleTopUpCompleted(event: TopUpCompleted): void {
+  let member = getOrCreateMember(event.params.operator.toHex());
+  member.amount = toDecimal(event.params.newAmount);
+  member.save()
+}
+
+export function handleTopUpInitiated(event: TopUpInitiated): void {
+  
 }

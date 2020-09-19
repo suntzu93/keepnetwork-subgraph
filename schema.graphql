@@ -2,6 +2,7 @@ enum StakingState{
   STAKED,
   RECOVERED_STAKED,
   STAKED_LOCK,
+  DELEGATED,
   UNDELEGATED,
   LOCK_RELEASED,
   EXPIRED_LOCK_RELEASED,
@@ -63,12 +64,8 @@ type TokenStaking @entity{
   id : ID!
   contractAddress: Bytes!
   initializationPeriod : BigInt
-  maximumLockDuration: BigInt
   minimumStake : BigInt
-  minimumStakeBase:  BigInt
-  minimumStakeSchedule:  BigInt
-  minimumStakeScheduleStart: BigInt
-  minimumStakeSteps:  BigInt
+  undelegationPeriod: BigInt
   totalStaker: BigInt
   totalTokenStaking: BigDecimal
   totalTokenSlash : BigDecimal

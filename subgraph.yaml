@@ -31,9 +31,9 @@ dataSources:
     name: StakingContract
     network: mainnet
     source:
-      address: "0x6D1140a8c8e6Fac242652F0a5A8171b898c67600"
+      address: "0x1293a54e160d1cd7075487898d65266081a15458"
       abi: StakingContract
-      startBlock : 9958429
+      startBlock : 10834080
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -41,11 +41,15 @@ dataSources:
       entities:
         - ExpiredLockReleased
         - LockReleased
+        - OperatorStaked
         - RecoveredStake
+        - StakeDelegated
         - StakeLocked
-        - Staked
+        - StakeOwnershipTransferred
         - TokensSeized
         - TokensSlashed
+        - TopUpCompleted
+        - TopUpInitiated
         - Undelegated
       abis:
         - name: StakingContract
@@ -57,16 +61,25 @@ dataSources:
           handler: handleExpiredLockReleased
         - event: LockReleased(indexed address,address)
           handler: handleLockReleased
-        - event: RecoveredStake(address,uint256)
+        - event: OperatorStaked(indexed address,indexed address,indexed address,uint256)
+          handler: handleOperatorStaked
+        - event: RecoveredStake(address)
           handler: handleRecoveredStake
+        - event: StakeDelegated(indexed address,indexed address)
+          handler: handleStakeDelegated
         - event: StakeLocked(indexed address,address,uint256)
           handler: handleStakeLocked
-        - event: Staked(indexed address,uint256)
-          handler: handleStaked
+        - event: StakeOwnershipTransferred(indexed address,indexed address)
+          handler: handleStakeOwnershipTransferred
         - event: TokensSeized(indexed address,uint256)
           handler: handleTokensSeized
         - event: TokensSlashed(indexed address,uint256)
           handler: handleTokensSlashed
+        - event: TopUpCompleted(indexed address,uint256)
+          handler: handleTopUpCompleted
+        - event: TopUpInitiated(indexed address,uint256)
+          handler: handleTopUpInitiated
         - event: Undelegated(indexed address,uint256)
           handler: handleUndelegated
       file: ./src/Staking.ts
+
